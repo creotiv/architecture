@@ -1,182 +1,150 @@
 # URL Shortener Service
 
-## Step 1: Business case
+## Step 1: Business Case
 
-URL shortener that will take URL and create shorted version of URL
+The URL shortener service is designed to generate shortened versions of long URLs and redirect users to the original URLs when accessed. The following requirements should be considered:
 
-Requirements:
-- User redirected to the original URL when accessed to the short version
-- User can add custom URL path, like: short.io/custom-name
-- User can track simple analytics(Number of views), using admin-key 
-generated with URL like: short.io/custom-name?adminkey=Dd3*Hf92
-- User can add up to 10 URL/day
-- Service should be able to work with 100M requests/day
-- Service should be able to simply scale up/down if needed
-- Service will save shortened URL for 2 month
- 
+- Users should be redirected to the original URL when accessing the short version.
+- Users can add custom URL paths like "short.io/custom-name"
+- Users can track simple analytics such as the number of views using an admin key generated with the URL.
+- Users are limited to adding up to 10 URLs per day.
+- The service should be capable of handling 100 million requests per day.
+- The service should be able to scale up or down easily.
+- Shortened URLs should be saved for a period of two months.
+
 ## Step 2: KPM & Constraints
 
-Key Performance Metrics
-- Redirect response latency < 50ms
-- Up time 99,99%
-- Severs load 80%
-- Analytics lag time up to 10min
+Key Performance Metrics:
+- Redirect response latency: <50ms
+- Uptime: 99.99%
+- Server load: 80%
+- Analytics lag time: up to 10 minutes
 
-### Constraints Start
-Requirements for project launch
+Constraints:
+- Initial launch traffic:
+  - Reads/Writes ratio: 100:1
+  - Daily Reads: 99 million requests
+  - Daily Writes: 1 million requests
+  - Linear load
+  - Read RPS (Requests Per Second): 1,145
+  - Write RPS: 12
+- Bandwidth:
+  - Write: 20KB/s
+  - Read: 0.7MB/s
+- Storage:
+  - Database (DB): 27GB for two months (with growth coefficient)
+  - Cache: 8.1GB for two months (30% of DB storage)
 
-Traffic:
-- Reads/Writes = 100/1
-- Reads/Day = 99M/req
-- Writes/Day = 1M/req
-- Linear Load
-- Read RPS = 1145
-- Write RPS = 12
+## Step 3: Data to be Saved
 
-Bandwidth:
-- Write = 12*500B = 20KB/s 
-- Read = 1145*100B + 1145*500B = 0.7MB/s
+The data to be saved in the URL shortener service includes:
 
-Storage:
-- DB 1M * 60days * 500B = 27GB/2 month (add some coef. for growth for few years)
-- Cache 30% =  27*0.3 = 8.1GB/2 month
-
-### Constraints Base
-Requirements for project after some time of work
-------//------
-
-### Constraints Load
-Requirements for project when best business scenario met
-------//------
-
-## Step 3: What data do we save
-Here we describing the data with which we will be working.
-It's not about DB schema, etc. It just to understand better what 
-we working with, so to understand how this data can be handled
-in the best way
- 
 Short URL object:
-- original URL
-- short URL
-- admin key
-- created_at
+- Original URL
+- Short URL
+- Admin key
+- Created timestamp
 
-## Step 4: What 3rd party components we will use
+Stats object:
+- Short URL
+- Number of views
 
-Here we need to choose what components we can use for our solution:
-DBs, Caches, Balancers, Reverse Proxies, Programming language, etc..
+## Step 4: Third-Party Components
 
-The main idea here is to pick what you are familiar with if it fit good for solution.
-In case if you don't have a good fit, new component that you don't familiar with 
-should be hard tested before use!
+The following third-party components can be considered for the solution:
 
-DB: 
-As our data is small, have no relations and used only for read(only 1* time write)
-we can use Key/Value or Column DB.
-AWS DynamoDB, ScylaDB, Cassandra, Redis, Couchbase, etc
+Database (DB):
+- AWS DynamoDB, ScylaDB, Cassandra, Redis, Couchbase, etc.
 
 Cache:
-Redis, AWS ElastiCache, Memcahced
+- Redis, AWS ElastiCache, Memcached
 
-Now check prices/features for each
-For example Redis vs AWS ElastiCache
-AWS EC2 Instance RAM 48GB, 24CPU, 25Gb/s - 870$/month
-AWS ElastiCache RAM 52GB, 24CPU, 10Gb/s - 870$/month
+Components should be evaluated based on features, pricing, and suitability for the solution. In this case, Redis running on an EC2 instance is chosen to minimize the number of different software used, simplify management, and reduce licensing costs.
 
-Let's assume that for db and cache we will use Redis on EC2 instance.
+## Step 5: High-Level Design
 
-**Why?**
-
-This will minimize amount of different software that we will use, which is good,
-as it minimize human resources needed and payment for licences if needed.
-
-Also redis is good fit as K/V store and Cache, and also using some idea farther
-we will drastically minimize amount of stored data. So our cache will be our DB.
-
-## Step 5: High-level design
-
-Here we build helicopter view on our architecture, describing the most 
-top blocks and processes of our architecture.
-
-As we need minimum latency we will need to use geo replication, to move servers,
-to the location near to client. But we will do this only for pages with redirect.
-For managing urls we will use one geo location, as we dont need such speed on write,
-and this will simplify and make less expensive our solution.
-
-That's why we have two types of services: for redirecting and for managing urls
-
-We also will need service that will generate short urls for us and will store
-(used/free/else urls data). So we have some batch already pregenerated urls
+The high-level design of the architecture includes two types of services: one for redirecting and another for managing URLs. Geo-replication is used to reduce latency for redirecting pages, while URL management services are hosted in a single geo-location to simplify the solution and reduce costs.
 
 ![High-level design](high-level-design.png)
 
-## Step 6: Thinking and pre-testing
+## Step 6: Analysis and Pre-testing
 
-At this stage we already now what we want and from what blocks it may be build.
-Here we trying to understand deeper how all these things will work, what and how
-we will be using. 
+At this stage, we have a clear understanding of our requirements and the components needed to build the system. Here, we delve deeper into understanding how these components will work and the specifics of their usage. Additionally, we conduct pre-tests to validate certain statements and address questions such as:
 
-Also we need to test some of our statements that may arise, like: 
-- Can Redis handle such load with good latency on read?
-- How we will replicate redis cluster to different geo-location, is it possible?
-- Etc.
+- Can Redis handle the anticipated load with good read latency?
+- How can we replicate the Redis cluster to different geo-locations? Is it possible?
+- And other relevant questions.
 
-### Simplify Key Generation Service
-Most of the internet for such URL shortener saying that we need KG Service with
-additional DB for saving keys. But it will cost more and i dont like it. So
-we will make it simpler.
+### Simplified Key Generation Service
 
-Instead of managing used/free urls, we will just save one counter and thats all.
-So instead saving 2-30GBs we will need to save few bytes only.
+Most URL shortener recommendations on the internet suggest using a Key Generation (KG) Service with an additional database for saving keys. However, this approach can be costly and unnecessary. Instead, I propose a simplified method.
 
-We have 7 symbols in our URL, from `aaaaaaa` to `zzzzzzz`. 
-That's 8B combinations. Let's assume that `aaaaaaa` == 1 and 
-`zzzzzzz` == 8B, `aaaaaab` == 2.
-So what we need is just increment counter for a new url and translate counter 
-to string based on our algorithm.
-To minimize load on DB we can generate in batches by 100-1000, depends on load.
-Also batch will give some randomness in url names.
+Rather than managing used/free URLs, we only need to save a counter. This approach significantly reduces storage requirements, from 2-30GB to just a few bytes.
 
-We have 1M new urls per day, so 60M per 2 month. Each url lives only 2 month.
-So when we will achieve 8B on our counter, url under index 1 will be already free to use.
-So we have something like round-robing algorithm here.
+Given that we have 7 symbols in our URL range, from `aaaaaaa` to `zzzzzzz`, we have 8 billion combinations. Let's assume `aaaaaaa` represents 1 and `zzzzzzz` represents 8 billion, with `aaaaaab` being 2, and so on. To generate a new URL, we increment the counter and translate it into a string based on our algorithm. To minimize the load on the database, we can generate URLs in batches of 100-1000, depending on the load. Using batches also introduces some randomness to the URL names.
 
-The only thing that you will need to monitor here is that url adding rate was 
-less than capacity of the 7symbols url.
+Considering that we have 1 million new URLs per day, totaling 60 million URLs over two months, and each URL has a lifespan of only 2 months, once we reach 8 billion on our counter, the URL under index 1 will already be available for reuse. This implementation resembles a round-robin algorithm.
+
+The only aspect to monitor is that the rate at which URLs are added remains below the capacity of the 7-symbol URL range.
 
 ### Redis TTL
-We use redis as it gives grate functionality for our use case.
-One of which is Key TTL, which removing from us need to write code for removing 
-urls after some time.
 
-### Cluster replication
-Free Redis doesnt have cluster replication functionality, but we can simply add it
-by creating proxy service that will replicate all comands from main cluster 
-to read clusters. This is simple task because of simplicity of redis protocol.
+Redis is an excellent choice for our use case, offering valuable functionality, including Key Time-To-Live (TTL), which eliminates the need for manual removal of expired URLs.
 
-It can be both Sync and Async task depends on speed and number of GEO clusters.
+### Cluster Replication
 
-### Views statistics
-For robust stats we will definitelly will need additional service group, 
-but to save just views not.
+While free Redis does not provide cluster replication functionality, we can easily add it by creating a proxy service that replicates all commands from the main cluster to the read clusters. The simplicity of the Redis protocol makes this task straightforward.
 
-But saving views during high-load also not very straightforward task.
-We cant just run increment on redis, because even if it fast, millions of reads,
-will create huge load for DB even in-memory one(Always protect DBs from HL).
+The replication can be both synchronous and asynchronous, depending on the speed and number of geo-clusters. Additionally, we need to implement write-ahead logs for all replication operations to ensure data integrity in the event of service failures.
 
-So what we will do? On each redirect instance will be a thread that will save 
-stats once a time/memory limits. Before that all views will besaved only in 
-instance memory/disk. This will minimize number of calls to DB.
+### View Statistics
 
-There is also another probabalistic hack that was popular 15 years ago.
-We set a write probability, for example 20%. And once it will shoot, 
-we will increment our views not by one, but by 5 (100/20). 
-As you understand it not precise on small numbers, but on big one preaty good.
+While robust statistics require an additional service group, for saving views alone, we can employ a different approach.
 
-But we will use first one aproach, as the second not guruntee that randomnes 
-will not shoot in our leg.
+Saving views during high-load situations is not a straightforward task. Simply incrementing the count on Redis would create a significant load on the database, even if it's an in-memory database. To mitigate this, each redirect instance will have a thread dedicated to saving statistics at specified time intervals or memory limits. Before saving, views will be stored in the instance's memory or disk, minimizing the number of calls made to the database.
 
-### Now we are ready to build detailed architecture
+An alternative probabilistic method that was popular 15 years ago is setting a write probability, such as 20%. Once triggered, the view count increments not by one, but by 5 (100/20). While this approach is imprecise with small numbers, it performs reasonably well with large numbers. However, we will utilize the first approach as the second does not guarantee that randomness will not lead to potential issues.
+
+The statistics will be saved through a service in the main geo cluster, with the possibility of replacing it with a more robust solution in the future.
+
+### Docker Container Deployment
+
+To simplify deployment, testing, reproducibility, and enhance dependency isolation, we will run all our services inside Docker containers. Although this may introduce a small overhead, it significantly streamlines the development process. It is important to remember that the cost of servers is not the only consideration; the cost of developers is often higher.
+
+## Step 7: Detailed Design
+
+Detailed design involves breaking down complex components into separate schemes and describing processes in more detail.
+
+![Detailed design](detailed-design.png)
+
+## Step 8: Contingency Planning
+
+In this step, we need to understand how to handle different types of failures and plan for contingencies. For example:
+
+### What if Stats Service Fails?
+If the Stats Service fails, we have a couple of options to handle the situation:
+- Save data on instances for a longer period until the service is restored.
+- Store data on an S3 bucket, which can be read and synced when the service becomes operational again.
+
+### What if Data Service Fails?
+If the Data Service fails, we will take the following actions:
+- Stop adding new URLs temporarily.
+- The redirect service will use a direct backup connection to the Redis cluster.
+- With the use of Write-Ahead Logs (WAL) in our Data Service, once the server is back online, it will reproduce all data that was not previously replicated.
+
+These contingency plans ensure that data is safeguarded and operations can resume smoothly in the event of service failures.
+
+## Step 9: Writing Documentation
+
+Documentation is created to provide detailed instructions for developers, including comprehensive information about the system's architecture, components, and processes.
+
+## Step 10: Development & Integration Plan
+
+A development and integration plan is formulated based on the designed architecture, outlining the steps required for implementing the system.
+
+## Step 11: Development and Control
+
+As an architect, it is essential to oversee the development process and ensure that the system is being implemented according to the designed architecture.
 
 
 PS: For drawing I used this service: https://excalidraw.com/
