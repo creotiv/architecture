@@ -134,6 +134,9 @@ If the Data Service fails, we will take the following actions:
 
 These contingency plans ensure that data is safeguarded and operations can resume smoothly in the event of service failures.
 
+For describing possible loss and risks i would recommend to use FAIR(Factor Analysis of Information Risk). 
+Here u can find some tool written on Python https://github.com/theonaunheim/pyfair
+
 ## Step 9: Writing Documentation
 
 Documentation is created to provide detailed instructions for developers, including comprehensive information about the system's architecture, components, and processes.
