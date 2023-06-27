@@ -20,8 +20,8 @@ Key Performance Metrics:
 - Server load: 80%
 - Analytics lag time: up to 10 minutes
 
-Constraints:
-- Initial launch traffic:
+Constraints for launch:
+- Traffic:
   - Reads/Writes ratio: 100:1
   - Daily Reads: 99 million requests
   - Daily Writes: 1 million requests
