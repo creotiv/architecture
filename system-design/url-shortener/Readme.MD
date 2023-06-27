@@ -143,7 +143,11 @@ Documentation is created to provide detailed instructions for developers, includ
 
 ## Step 10: Development & Integration Plan
 
-A development and integration plan is formulated based on the designed architecture, outlining the steps required for implementing the system.
+A development and integration plan is formulated based on the designed architecture and business situation, outlining the steps required for implementing the system.
+
+For example we may add geo-replication later, stats also can be added later. So we can break our system in 3 step initial deployment.
+That will decrease time to market, and will save money if product will fail on first step.
+Better to get feedback sooner than later.
 
 ## Step 11: Development and Control
 
