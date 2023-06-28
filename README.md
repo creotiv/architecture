@@ -1,4 +1,6 @@
 # Architecture & System Design
+- [Twitter timeline Architeture](system-design/twitter-timeline)
+- [Url shortener Architeture. Crucial steps in system design](system-design/url-shortener)
 
 ## Blogs to read
 - https://engineering.fb.com/
