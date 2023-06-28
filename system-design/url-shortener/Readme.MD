@@ -1,5 +1,7 @@
 # URL Shortener Service
 
+[![Architecture of the URL Shortener](youtube.png)](https://www.youtube.com/watch?v=77XfD_kIPOM)
+
 ## Step 1: Business Case
 
 The URL shortener service is designed to generate shortened versions of long URLs and redirect users to the original URLs when accessed. The following requirements should be considered:
