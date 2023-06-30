@@ -1,0 +1,5 @@
+# do not add bash shebang as script will be placed in another
+
+current_version=$(dpkg-query -W -f='${Version}' graceful-upgrade-example )
+echo $current_version > /var/tmp/graceful-upgrade-example-prev-version
+echo "Current version: $current_version"

@@ -2,6 +2,9 @@
 - [Twitter timeline Architeture](system-design/twitter-timeline)
 - [Url shortener Architeture. Crucial steps in system design](system-design/url-shortener)
 
+# Approaches
+- [Graceful upgrade or zero-downtime upgrade or seamless upgrade](approach/graceful-upgrade)
+
 ## Blogs to read
 - https://engineering.fb.com/
 - https://netflixtechblog.com/

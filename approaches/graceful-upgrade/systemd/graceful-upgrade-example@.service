@@ -1,0 +1,11 @@
+[Unit]
+Description=Grceful upgrade example
+
+[Service]
+Type=simple
+ExecStart=/opt/graceful-upgrade-example/bin/graceful-upgrade-example
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

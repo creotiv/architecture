@@ -1,0 +1,17 @@
+# do not add bash shebang as script will be placed in another
+
+new_version=$(dpkg-query -W -f='${Version}' graceful-upgrade-example)
+echo "Starting new version: $new_version"
+
+systemctl daemon-reload
+systemctl start "graceful-upgrade-example@$new_version"
+sleep 3
+
+if [ -f /var/tmp/graceful-upgrade-example-prev-version ]; then
+    prev_version=$(cat /var/tmp/graceful-upgrade-example-prev-version)
+    echo "Stopping previous version: $prev_version"
+    systemctl stop "graceful-upgrade-example@$prev_version"
+else
+    echo "Stopping with no version"
+    systemctl stop graceful-upgrade-example
+fi
