@@ -51,7 +51,7 @@ Stats object:
 - Short URL
 - Number of views
 
-## Step 5: High-Level Design
+## Step 4: High-Level Design
 
 The high-level design of the architecture includes two types of services: one for redirecting and another for managing URLs. Geo-replication is used to reduce latency for redirecting pages, while URL management services are hosted in a single geo-location to simplify the solution and reduce costs.
 
