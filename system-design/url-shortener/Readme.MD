@@ -51,7 +51,13 @@ Stats object:
 - Short URL
 - Number of views
 
-## Step 4: Third-Party Components
+## Step 5: High-Level Design
+
+The high-level design of the architecture includes two types of services: one for redirecting and another for managing URLs. Geo-replication is used to reduce latency for redirecting pages, while URL management services are hosted in a single geo-location to simplify the solution and reduce costs.
+
+![High-level design](high-level-design.png)
+
+## Step 5: Third-Party Components
 
 The following third-party components can be considered for the solution:
 
@@ -62,12 +68,6 @@ Cache:
 - Redis, AWS ElastiCache, Memcached
 
 Components should be evaluated based on features, pricing, and suitability for the solution. In this case, Redis running on an EC2 instance is chosen to minimize the number of different software used, simplify management, and reduce licensing costs.
-
-## Step 5: High-Level Design
-
-The high-level design of the architecture includes two types of services: one for redirecting and another for managing URLs. Geo-replication is used to reduce latency for redirecting pages, while URL management services are hosted in a single geo-location to simplify the solution and reduce costs.
-
-![High-level design](high-level-design.png)
 
 ## Step 6: Analysis and Pre-testing
 
